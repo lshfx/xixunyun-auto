@@ -5,7 +5,13 @@ on:
     branches:
       - main
   schedule:
-    - cron: 0 0 * * *
+    - cron: '0 0 * * *'
+  workflow_dispatch:  # 添加手动触发
+    inputs:
+      reason:
+        description: '手动触发原因 (可选)'
+        required: false
+        default: '手动触发'
 
 jobs:
   sign:
@@ -13,12 +19,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      # 使用 node:10
       - name: use Node.js 10.x
         uses: actions/setup-node@v1
         with:
           node-version: 10.x
-      # npm install
       - name: 签到日志
         env:
           ACCOUNT: ${{ secrets.ACCOUNT }}
@@ -34,3 +38,7 @@ jobs:
         run: |
           npm install
           node app.js
+      - name: 打印触发原因 (可选)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "Workflow was manually triggered. Reason: ${{ github.event.inputs.reason }}"
